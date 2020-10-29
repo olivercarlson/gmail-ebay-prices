@@ -4,7 +4,6 @@ import readline from 'readline';
 import { google } from 'googleapis';
 import { promisify } from 'util';
 import { getAllJSDocTagsOfKind } from 'typescript';
-import { oauth2 } from 'googleapis/build/src/apis/oauth2';
 
 const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
 const TOKEN_PATH = 'token.json';
@@ -97,7 +96,7 @@ const listMessages = async (auth) => {
 		{
 			userId: 'me',
 			q: 'from: eBay ORDER CONFIRMED:',
-			maxResults: 5,
+			maxResults: 1,
 		},
 		(err, res) => {
 			if (!res || !res.data || !res.data.messages) {
