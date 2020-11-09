@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import { getAuthorizedClient } from './googleAuth';
+import _ from 'underscore.string';
 
 /**
  * Lists the labels in the user's account.
@@ -24,7 +25,7 @@ const listMessages = async (auth) => {
 				return;
 			}
 			res.data.messages.forEach((message) => {
-				console.log(message);
+				console.log(`first api call: ${message}`);
 				mails.push(message.id ?? '');
 			});
 			mails.forEach((id) => {
@@ -32,10 +33,12 @@ const listMessages = async (auth) => {
 					{
 						userId: 'me',
 						id,
+						format: 'raw',
 					},
 					(err, res) => {
-						// data = res?.data.snippet!;
-						console.log(res?.data);
+						data = res?.data.raw!;
+						let buff = Buffer.from(data, 'base64').toString();
+						console.log(_.stripTags(buff));
 					}
 				);
 			});

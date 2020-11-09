@@ -3,7 +3,6 @@ import fs from 'fs';
 import readline from 'readline';
 import { google } from 'googleapis';
 import { promisify } from 'util';
-import { getAllJSDocTagsOfKind } from 'typescript';
 
 readline.Interface.prototype.question[promisify.custom] = function (prompt) {
 	return new Promise((resolve) => readline.Interface.prototype.question.call(this, prompt, resolve));
