@@ -13,15 +13,21 @@ const listMessages = async (auth) => {
 	const gmail = google.gmail({ version: 'v1', auth });
 	let data: string | undefined;
 	const mails: string[] = [];
+	// #TODO: fetch query info from fs.
+	let query = 'from: eBay ORDER CONFIRMED:';
 	gmail.users.messages?.list(
 		{
 			userId: 'me',
-			q: 'from: eBay ORDER CONFIRMED:',
+			q: query,
 			maxResults: 1,
 		},
 		(err, res) => {
-			if (!res || !res.data || !res.data.messages) {
-				console.log('No Messages Found');
+			if (!res || !res.data) {
+				console.log('Failed to query the gmail service');
+				return;
+			}
+			if (!res.data.messages) {
+				console.log(`Failed to find any emails matching the specific input ${query}`);
 				return;
 			}
 			res.data.messages.forEach((message) => {
