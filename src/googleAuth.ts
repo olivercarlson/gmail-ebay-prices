@@ -1,5 +1,5 @@
 // import express from 'express';
-import fs from 'fs';
+import { readFile, writeFile } from 'fs/promises';
 import readline from 'readline';
 import { google } from 'googleapis';
 import { promisify } from 'util';
@@ -11,9 +11,6 @@ readline.Interface.prototype.questionAsync = promisify(readline.Interface.protot
 
 const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
 const TOKEN_PATH = 'token.json';
-
-const readFile = promisify(fs.readFile);
-const writeFile = promisify(fs.writeFile);
 
 interface Credentials {
 	installed: {

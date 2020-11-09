@@ -1,6 +1,7 @@
 import { google } from 'googleapis';
 import { getAuthorizedClient } from './googleAuth';
 import _ from 'underscore.string';
+import { readFile, writeFile } from 'fs/promises';
 
 /**
  * Lists the labels in the user's account.
@@ -23,7 +24,7 @@ const listMessages = async (auth) => {
 		},
 		(err, res) => {
 			if (!res || !res.data) {
-				console.log('Failed to query the gmail service');
+				console.log('Failed to generate a response from the gmail service');
 				return;
 			}
 			if (!res.data.messages) {
@@ -44,7 +45,8 @@ const listMessages = async (auth) => {
 					(err, res) => {
 						data = res?.data.raw!;
 						let buff = Buffer.from(data, 'base64').toString();
-						console.log(_.stripTags(buff));
+						// let temp = _.stripTags(buff);
+						writeFile('./temp.txt', buff, 'utf-8');
 					}
 				);
 			});
