@@ -1,6 +1,10 @@
+# TS and Node Files:
 /dist
 node_modules
 .env
-credentials.json
-token.json
-*.txt
+
+
+# Files for debugging.
+**credentials.json
+**token.json
+**.txt

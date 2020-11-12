@@ -1,5 +1,5 @@
-import { google } from 'googleapis';
-import { getAuthorizedClient } from './googleAuth';
+import { google, gmail_v1, oauth2_v2 } from 'googleapis';
+import { getGmailCredentials } from './googleAuth';
 import _ from 'underscore.string';
 import { readFile, writeFile } from 'fs/promises';
 
@@ -9,8 +9,12 @@ import { readFile, writeFile } from 'fs/promises';
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 
+// what is NOT gmail auth:
+// query ''
+//
+
 // we want to call "getAuth" > return an auth client. and then proceed to everything else here
-const listMessages = async (auth) => {
+const getEmails = async (auth: any) => {
 	const gmail = google.gmail({ version: 'v1', auth });
 	let data: string | undefined;
 	const mails: string[] = [];
@@ -45,8 +49,10 @@ const listMessages = async (auth) => {
 					(err, res) => {
 						data = res?.data.raw!;
 						let buff = Buffer.from(data, 'base64').toString();
-						// let temp = _.stripTags(buff);
-						writeFile('./temp.txt', buff, 'utf-8');
+						let temp = _.stripTags(buff);
+						writeFile('./temp.stripped.txt', temp, 'utf-8');
+						// writeFile('./temp.txt', buff, 'utf-8');
+						console.log('stored information to file');
 					}
 				);
 			});
@@ -54,7 +60,9 @@ const listMessages = async (auth) => {
 	);
 };
 
-const auth = getAuthorizedClient('credentials.json').then((credentials) => {
-	listMessages(credentials);
-	// console.log(credentials);
-});
+const main = async () => {
+	const credentials = await getGmailCredentials('credentials.json');
+	getEmails(credentials);
+};
+
+main();

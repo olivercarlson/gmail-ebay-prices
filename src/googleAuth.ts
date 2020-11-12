@@ -1,17 +1,11 @@
 // import express from 'express';
 import { readFile, writeFile } from 'fs/promises';
-import readline from 'readline';
+import readline from 'readline-promise';
 import { google } from 'googleapis';
-import { promisify } from 'util';
-
-readline.Interface.prototype.question[promisify.custom] = function (prompt) {
-	return new Promise((resolve) => readline.Interface.prototype.question.call(this, prompt, resolve));
-};
-readline.Interface.prototype.questionAsync = promisify(readline.Interface.prototype.question);
 
 const SCOPES = ['https://www.googleapis.com/auth/gmail.readonly'];
 const TOKEN_PATH = 'token.json';
-
+const GMAIL_API_URL = 'https://developers.google.com/gmail/api/quickstart/nodejs';
 interface Credentials {
 	installed: {
 		client_secret?: string;
@@ -21,21 +15,23 @@ interface Credentials {
 }
 
 /**
- * Create an OAuth2 client with the given credentials, and then execute the
- * given callback function.
+ * Create an OAuth2 client with the given credentials, and then store the
+ * result in token.json.
  * @param {Object} credentials  Path to the authorization client credentials.
  * @returns {google.auth.OAuth2} Authorized OAuth 2 client
  */
 
-export const getAuthorizedClient = async (credentialsPath: string) => {
-	let clientSecrets: string;
+export const getGmailCredentials = async (credentialsPath: string) => {
+	var clientSecrets: string;
+
 	try {
 		clientSecrets = await readFile(credentialsPath, { encoding: 'utf-8' });
+		const authorizedClient = await authorize(JSON.parse(clientSecrets));
+		return authorizedClient;
 	} catch (e) {
-		return console.log('Error loading client secret file:', e);
+		console.log(`Error loading credentials.json file: \n`, e);
+		return;
 	}
-	const authorizedClient = await authorize(JSON.parse(clientSecrets));
-	return authorizedClient;
 };
 
 /**
@@ -44,7 +40,7 @@ export const getAuthorizedClient = async (credentialsPath: string) => {
  * @param {Object} credentials The authorization client credentials.
  */
 
-// return an oAuth2Client
+// returns an oAuth2Client
 const authorize = async (credentials: Credentials) => {
 	const { client_secret, client_id, redirect_uris } = credentials.installed;
 	const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
@@ -67,32 +63,8 @@ const authorize = async (credentials: Credentials) => {
  * @param {google.auth.OAuth2} oAuth2Client The OAuth2 client to get token for.
  * @returns {google.auth.OAuth2} Authorized oAuth2Client and
  */
-// const getNewToken = async (oAuth2Client) => {
-// 	const authUrl = oAuth2Client.generateAuthUrl({
-// 		access_type: 'offline',
-// 		scope: SCOPES,
-// 	});
-// 	console.log('Authorize this app by visiting this url:', authUrl);
-// 	const rl = readline.createInterface({
-// 		input: process.stdin,
-// 		output: process.stdout,
-// 	});
-// 	const code = await rl.questionAsync('Enter the code from that page here: ');
-// 	rl.close();
-// 	return oAuth2Client.getToken(code, (err, token) => {
-// 		console.log(`token in here:`);
-// 		if (err) return console.error('Error retrieving access token', err);
-// 		oAuth2Client.setCredentials(token);
-// 		// Store the token to disk for later program executions
-// 		fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
-// 			if (err) return console.error(err);
-// 			console.log('Token stored to', TOKEN_PATH);
-// 		});
-// 		return oAuth2Client;
-// 	});
-// };
 
-const getNewToken = async (oAuth2Client) => {
+const getNewToken = async (oAuth2Client: any) => {
 	const authUrl = oAuth2Client.generateAuthUrl({
 		access_type: 'offline',
 		scope: SCOPES,
@@ -102,25 +74,21 @@ const getNewToken = async (oAuth2Client) => {
 		output: process.stdout,
 	});
 	console.log('Authorize this app by visiting this url:', authUrl);
-	const code = await rl.questionAsync('Enter the code from that page here: ');
-	// console.log(`code is ${code}`);
+	const code = await rl.question('Enter the code from that page here: ');
 	rl.close();
 	let token: object;
 	try {
 		let res = await oAuth2Client.getToken(code);
 		token = res['tokens'];
+	} catch (err) {
+		return console.error(`Failed to get token for OAuth2 Client. Error: ${err}`);
+	}
+	try {
 		oAuth2Client.setCredentials(token);
 		await writeFile(TOKEN_PATH, JSON.stringify(token));
-		console.log('Token stored to', TOKEN_PATH);
-		// return oAuth2Client;
+		console.log('Token successfully stored to', TOKEN_PATH);
 	} catch (err) {
-		return console.error(`Error retrieving access token ${err}`);
+		return console.error(`Error storing access token. Error: ${err}`);
 	}
 	return oAuth2Client;
-
-	// Store the token to disk for later program executions
-	try {
-	} catch (err) {
-		return console.error(err);
-	}
 };

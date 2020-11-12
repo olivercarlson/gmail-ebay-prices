@@ -18,6 +18,7 @@
 		"@types/underscore.string": "0.0.38",
 		"express": "^4.17.1",
 		"googleapis": "^61.0.0",
+		"readline-promise": "^1.0.4",
 		"tsc-watch": "^4.2.9",
 		"typescript": "^4.0.5",
 		"underscore.string": "^3.3.5"
