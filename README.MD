@@ -13,13 +13,13 @@ A tool to automatically parse through gmail inboxes and return all eBay orders f
 -   [ ] Logic to handle a single e-mail:
     -   [x] Parse and convert message from B64 to utf-8
     -   [x] Strip HTML tags
-    -   [ ] Locate all relevant information
+    -   [ ] Locate all relevant information within HTML nodes
     -   [ ] Store information in temp buffer or StringIO
     -   [ ] Save data as CSV
     -   [ ] Grab "View Order Details" Link
 -   [ ] Finish skeleton structure for organizing code by adding:
     -   [ ] Add general routes type structure for app.ts to select retailers
-    -   [ ] Tentative logic separation: /gmailAuth/, /stores/\* (eBay, BestBuy), config.json/.yaml
+    -   [ ] Tentative logic separation: /gmailAuth/, /stores/\* (eBay, BestBuy), config.json
 
 ### Backlog:
 

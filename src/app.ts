@@ -1,29 +1,31 @@
-import { google, gmail_v1, oauth2_v2 } from 'googleapis';
+import { google } from 'googleapis';
 import { getGmailCredentials } from './googleAuth';
 import _ from 'underscore.string';
 import { readFile, writeFile } from 'fs/promises';
+import { CREDENTIALS_PATH } from './res/strings';
+import { appConfig } from '../appConfig';
+// #TODO: separate out files by purpose (gmail auth vs store specific)
+// settings.json:
+// date range (default: all)
+// # of emails per res (default=max=100)
+//
 
 /**
- * Lists the labels in the user's account.
  *
+ * Batch fetch, process, and export all email's in user's inbox matching on  the  in the user's account.
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 
-// what is NOT gmail auth:
-// query ''
-//
-
-// we want to call "getAuth" > return an auth client. and then proceed to everything else here
 const getEmails = async (auth: any) => {
 	const gmail = google.gmail({ version: 'v1', auth });
 	let data: string | undefined;
 	const mails: string[] = [];
 	// #TODO: fetch query info from fs.
-	let query = 'from: eBay ORDER CONFIRMED:';
+	let query = '';
 	gmail.users.messages?.list(
 		{
 			userId: 'me',
-			q: query,
+			q: appConfig.ebay.query,
 			maxResults: 1,
 		},
 		(err, res) => {
@@ -61,7 +63,13 @@ const getEmails = async (auth: any) => {
 };
 
 const main = async () => {
-	const credentials = await getGmailCredentials('credentials.json');
+	let credentials;
+	try {
+		credentials = await getGmailCredentials(CREDENTIALS_PATH);
+	} catch (e) {
+		console.error(e);
+		return;
+	}
 	getEmails(credentials);
 };
 
